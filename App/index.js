@@ -1,85 +1,86 @@
 // Filename: index.js
 // Combined code from all files
 
-import React, { useState } from 'react';
-import {
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
-    Button,
-    Image,
-    FlatList,
-    ActivityIndicator,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import React from 'react';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View, Image, FlatList, Dimensions } from 'react-native';
 
-const App = () => {
+const { width } = Dimensions.get('window');
+
+const cars = [
+    { id: '1', image: 'https://picsum.photos/400/200', title: 'Car 1' },
+    { id: '2', image: 'https://picsum.photos/400/200', title: 'Car 2' },
+    { id: '3', image: 'https://picsum.photos/400/200', title: 'Car 3' },
+    { id: '4', image: 'https://picsum.photos/400/200', title: 'Car 4' },
+    { id: '5', image: 'https://picsum.photos/400/200', title: 'Car 5' },
+];
+
+const CarCards = () => {
+    const renderItem = ({ item }) => (
+        <View style={carStyles.cardContainer}>
+            <Image source={{ uri: item.image }} style={carStyles.image} />
+            <View style={carStyles.textOverlay}>
+                <Text style={carStyles.cardTitle}>{item.title}</Text>
+            </View>
+        </View>
+    );
+
     return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <Text style={styles.title}>My Car Community Garage</Text>
-                <Text style={styles.subtitle}>Share and showcase your garage</Text>
-                <Garage />
+        <FlatList
+            data={cars}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={carStyles.list}
+        />
+    );
+};
+
+const carStyles = StyleSheet.create({
+    list: {
+        paddingVertical: 20,
+    },
+    cardContainer: {
+        width: width * 0.8,
+        height: width * 0.5,
+        marginHorizontal: 10,
+        borderRadius: 15,
+        overflow: 'hidden',
+        backgroundColor: '#FFFFFF',
+        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+    },
+    image: {
+        width: '100%',
+        height: '100%',
+    },
+    textOverlay: {
+        position: 'absolute',
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        width: '100%',
+        padding: 10,
+    },
+    cardTitle: {
+        color: '#FFFFFF',
+        fontSize: 18,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+});
+
+export default function App() {
+    return (
+        <SafeAreaView style={appStyles.container}>
+            <ScrollView contentContainerStyle={appStyles.scrollContainer}>
+                <Text style={appStyles.title}>My Car Community</Text>
+                <Text style={appStyles.subtitle}>Explore featured garages</Text>
+                <CarCards />
             </ScrollView>
         </SafeAreaView>
     );
-};
+}
 
-const Garage = () => {
-    const [carImages, setCarImages] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-
-    const pickImage = async () => {
-        // Request permission to access the media library
-        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-        if (permissionResult.granted === false) {
-            alert('Permission to access camera roll is required!');
-            return;
-        }
-
-        setIsLoading(true);
-
-        const pickerResult = await ImagePicker.launchImageLibraryAsync({
-            allowsEditing: true,
-            aspect: [4, 3],
-        });
-
-        if (!pickerResult.cancelled) {
-            setCarImages([...carImages, pickerResult.uri]);
-        }
-
-        setIsLoading(false);
-    };
-
-    const renderItem = ({ item }) => (
-        <View style={garageStyles.imageContainer}>
-            <Image source={{ uri: item }} style={garageStyles.image} />
-        </View>
-    );
-
-    return (
-        <View style={garageStyles.container}>
-            {isLoading ? (
-                <ActivityIndicator size="large" color="#0000ff" />
-            ) : (
-                <View style={garageStyles.buttonContainer}>
-                    <Button title="Upload Car Image" onPress={pickImage} />
-                </View>
-            )}
-            <FlatList
-                data={carImages}
-                renderItem={renderItem}
-                keyExtractor={(item, index) => index.toString()}
-                contentContainerStyle={garageStyles.list}
-            />
-        </View>
-    );
-};
-
-const styles = StyleSheet.create({
+const appStyles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#FFFFFF',
@@ -100,26 +101,3 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
 });
-
-const garageStyles = StyleSheet.create({
-    container: {
-        alignItems: 'center',
-    },
-    buttonContainer: {
-        marginBottom: 20,
-    },
-    list: {
-        alignItems: 'center',
-        width: '100%',
-    },
-    imageContainer: {
-        margin: 10,
-    },
-    image: {
-        width: 200,
-        height: 150,
-        borderRadius: 10,
-    },
-});
-
-export default App;
